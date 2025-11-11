@@ -1,4 +1,5 @@
 import csv
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -16,14 +17,12 @@ def check_file_types(folder: Path) -> bool:
 
 def create_month_expenses_csv(
     month: int,
-    overwrite: bool = False,
+    overwrite: bool = True,
     encoding: str = "utf-8",
 ) -> Path:
     path = Path.cwd() / f"{month}-expenses.csv"
     if path.exists() and not overwrite:
         raise FileExistsError(f"File already exists: {path}")
-    with path.open("w", newline="", encoding=encoding) as f:
-        csv.writer(f)
     return path
 
 
@@ -40,24 +39,30 @@ def get_budgets(month: int, folder: Path = FOLDER) -> Optional[Path]:
     if not check_file_types(folder):
         return None
 
-    create_month_expenses_csv(month)
-    process_budgets(folder)
+    output_csv = create_month_expenses_csv(month)
+    process_budgets(folder, month, output_csv)
     print("all done")
     return
     
     
-def process_budgets(folder):
+def process_budgets(folder, month, path): 
+     rows_to_add = []
      for budget in folder.iterdir():
         with open(budget, 'r', newline='') as file:
              reader = csv.reader(file)
              for row in reader:
-                 # TODO: make a function to add the amounts and filter by date
-    
-             
-        
-			
-		
+                 if get_month(row[0]) == month and row[2]:
+                     rows_to_add.append([row[1],row[2]])                      
+     with path.open('w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for new_row in rows_to_add:
+            writer.writerow(new_row)                
+                     		
 
 def get_month(dateString):
-    month = int(dateString.split("/")[0])
-    return month
+    month = ''
+    if '-' in dateString:
+        month = re.split(r'[/-]',dateString)[1]
+    elif '/' in dateString:
+        month = re.split(r'[/-]',dateString)[0]
+    return int(month)
