@@ -1,6 +1,5 @@
 import argparse
-from services import get_budgets
-
+from budget_services import get_budgets
 
 def parse_cli(args=None) -> int:
     parser = argparse.ArgumentParser(

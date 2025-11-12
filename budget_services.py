@@ -17,8 +17,7 @@ def check_file_types(folder: Path) -> bool:
 
 def create_month_expenses_csv(
     month: int,
-    overwrite: bool = True,
-    encoding: str = "utf-8",
+    overwrite: bool = True
 ) -> Path:
     path = Path.cwd() / f"{month}-expenses.csv"
     if path.exists() and not overwrite:
